@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3f1e8" />
+    <title>Unstuck — Card Deck</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="masthead">
+        <img class="brand-logo" src="assets/branding/unstuck-logo.png" alt="Unstuck" />
+      </header>
+
+      <section class="table" aria-label="Virtual card table">
+        <div class="play-area">
+          <div class="stage">
+            <div class="deck-stack" aria-hidden="true">
+              <div></div><div></div><div></div>
+            </div>
+
+            <button class="card" id="card" type="button" aria-label="Flip current card">
+              <span class="card-motion">
+                <span class="card-inner">
+                  <span class="card-face card-back"><img id="back-image" alt="" /></span>
+                  <span class="card-face card-front"><img id="front-image" alt="" /></span>
+                </span>
+              </span>
+            </button>
+
+            <p class="empty-message" id="empty-message" hidden>
+              Every card has been drawn. Shuffle to begin again.
+            </p>
+          </div>
+
+          <div class="controls">
+            <button class="control primary" id="shuffle" type="button">Shuffle</button>
+            <div class="flip-group">
+              <button class="control secondary" id="flip" type="button">Flip</button>
+              <p class="hint">Tip: tap the card itself to flip it.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-picker" role="group" aria-label="Choose deck category">
+          <button class="category active" data-category="all">All <span>54</span></button>
+          <button class="category" data-category="stuck">Stuck <span>24</span></button>
+          <button class="category" data-category="unstuck">Unstuck <span>24</span></button>
+          <button class="category" data-category="wildcard">Wildcard <span>6</span></button>
+        </div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
