@@ -1,1 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Unstuck Rabbit Banner</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <main class="tool">
+      <section class="stage" aria-label="Animation preview">
+        <svg id="preview" viewBox="0 0 440 200" width="880" height="400"
+          preserveAspectRatio="xMidYMid meet" role="img" aria-label="Unstuck rabbit animation">
+          <rect width="440" height="200" fill="#E72D48"></rect>
+        </svg>
+      </section>
 
+      <div class="controls">
+        <button id="restart" class="button button-secondary" type="button">Restart preview</button>
+        <button id="exportMp4" class="button button-primary" type="button">Export MP4</button>
+      </div>
+
+      <p id="status" class="status" aria-live="polite">Ready.</p>
+    </main>
+    <script src="./script.js"></script>
+  </body>
+</html>
