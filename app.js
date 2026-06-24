@@ -104,6 +104,10 @@ function drawFromActiveDeck() {
   const availableTiers = tiersAvailableForDraw(drawNumber);
   let candidates = state.remaining.filter(card => availableTiers.has(card.tier));
 
+  if (selectedCategory === "all" && drawNumber <= 2) {
+    candidates = candidates.filter(card => card.category !== "wildcard");
+  }
+
   if (
     selectedCategory === "all" &&
     drawNumber === 2 &&
