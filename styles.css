@@ -229,7 +229,7 @@ button { font: inherit; }
   100% { transform: scale(1); }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .app-shell { width: min(100% - 18px, 620px); padding-top: 20px; }
   .masthead { min-height: 58px; margin: -10px 4px -2px; }
   .brand-logo { width: 118px; }
@@ -267,6 +267,122 @@ button { font: inherit; }
     width: 120px;
     min-width: 120px;
     padding: 14px 18px;
+  }
+}
+
+/* Fluid full-screen phone layouts. The height guard keeps the custom
+   285 × 500 portfolio iframe on its dedicated rules below. */
+@media (max-width: 480px) and (min-height: 521px) {
+  body { min-width: 0; }
+
+  .app-shell {
+    width: calc(100% - clamp(14px, 4vw, 18px));
+    padding-top: clamp(16px, 5vw, 20px);
+    padding-bottom: clamp(24px, 8vw, 40px);
+  }
+
+  .masthead {
+    min-height: clamp(52px, 14vw, 58px);
+  }
+
+  .brand-logo {
+    width: clamp(96px, 27.75vw, 118px);
+  }
+
+  .table {
+    min-height: clamp(620px, calc(100vh - 120px), 680px);
+    padding-inline: clamp(8px, 2.5vw, 10px);
+    border-radius: clamp(18px, 6vw, 24px);
+  }
+
+  .stage {
+    min-height: clamp(450px, 122vw, 520px);
+  }
+
+  .controls {
+    grid-template-columns: repeat(2, clamp(104px, 28vw, 120px));
+    column-gap: clamp(10px, 3.75vw, 16px);
+  }
+
+  .control {
+    width: clamp(104px, 28vw, 120px);
+    min-width: 0;
+    padding-inline: clamp(12px, 4vw, 18px);
+  }
+
+  .category-picker {
+    flex-wrap: nowrap;
+    gap: clamp(4px, 1.5vw, 8px);
+    margin-top: clamp(18px, 5.5vw, 24px);
+  }
+
+  .category {
+    padding: clamp(7px, 2.2vw, 9px) clamp(6px, 2.8vw, 13px);
+    white-space: nowrap;
+    font-size: clamp(10px, 3.05vw, 13px);
+  }
+
+  .category span {
+    margin-left: clamp(1px, .7vw, 3px);
+  }
+}
+
+/* Fluid compact-laptop layout. Height-aware sizing keeps the full game
+   visible on shorter displays while preserving the wide composition. */
+@media (min-width: 901px) and (max-width: 1200px) and (min-height: 601px) {
+  .app-shell {
+    width: min(1120px, calc(100% - 32px));
+    padding-top: clamp(20px, 3vh, 30px);
+    padding-bottom: clamp(24px, 4vh, 36px);
+  }
+
+  .masthead {
+    min-height: clamp(48px, 7vh, 58px);
+    margin: -8px 0 -2px;
+  }
+
+  .brand-logo {
+    width: clamp(100px, 11vw, 125px);
+  }
+
+  .table {
+    min-height: min(680px, calc(100vh - 145px));
+    padding: clamp(14px, 2vw, 20px) clamp(16px, 2vw, 24px) clamp(16px, 2vw, 22px);
+  }
+
+  .play-area {
+    transform: translateX(clamp(8px, 1.8vw, 20px));
+  }
+
+  .stage {
+    min-height: min(580px, calc(100vh - 225px));
+  }
+
+  .card {
+    width: min(clamp(320px, 35vw, 370px), calc((100vh - 215px) * .666));
+  }
+
+  .deck-stack {
+    left: calc(50% - clamp(245px, 28vw, 285px));
+    width: clamp(285px, 32vw, 335px);
+  }
+
+  .controls {
+    left: calc(75% + clamp(60px, 7vw, 90px));
+  }
+
+  .control {
+    min-width: clamp(140px, 15vw, 165px);
+    padding: clamp(13px, 1.5vw, 17px) clamp(20px, 2.3vw, 26px);
+  }
+
+  .flip-group {
+    width: clamp(140px, 15vw, 165px);
+  }
+
+  .category-picker {
+    margin-top: clamp(8px, 1.2vw, 14px);
+    gap: clamp(6px, .8vw, 8px);
   }
 }
 
@@ -347,8 +463,8 @@ button { font: inherit; }
   }
 }
 
-/* Micro portrait embed: optimized for a 258 Ã— 390 portfolio widget. */
-@media (max-width: 320px) and (max-height: 450px) {
+/* Micro portrait embed: optimized for compact portfolio widgets (285 × 500). */
+@media (max-width: 340px) and (max-height: 520px) {
   html, body {
     width: 100%;
     height: 100%;
@@ -358,11 +474,11 @@ button { font: inherit; }
 
   .app-shell {
     display: grid;
-    grid-template-rows: 28px minmax(0, 1fr);
-    gap: 3px;
+    grid-template-rows: 42px minmax(0, 1fr);
+    gap: 6px;
     width: 100%;
     height: 100%;
-    padding: 5px;
+    padding: 8px 12px 10px;
   }
 
   .masthead {
@@ -371,8 +487,8 @@ button { font: inherit; }
   }
 
   .brand-logo {
-    width: 48px;
-    transform: translateY(calc(-12% - 1px));
+    width: 68px;
+    transform: translateY(-1px);
   }
 
   .table {
@@ -389,7 +505,7 @@ button { font: inherit; }
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;
     min-height: 0;
-    transform: none;
+    transform: translateY(-13px);
   }
 
   .stage {
@@ -402,7 +518,7 @@ button { font: inherit; }
 
   .card {
     width: auto;
-    height: min(172px, calc(100vh - 180px));
+    height: min(300px, calc(100vh - 185px));
     border-radius: 10px;
     filter: drop-shadow(0 8px 8px rgba(28, 28, 27, .15));
   }
@@ -419,7 +535,7 @@ button { font: inherit; }
     transform: none;
     grid-template-columns: 86px 86px;
     column-gap: 8px;
-    row-gap: 4px;
+    row-gap: 9px;
     justify-content: center;
     align-items: start;
   }
@@ -448,14 +564,16 @@ button { font: inherit; }
 
   .category-picker {
     flex: 0 0 auto;
-    margin-top: 6px;
-    gap: 4px;
+    margin-top: 12px;
+    margin-bottom: 1px;
+    gap: 3px;
+    transform: translateY(-13px);
   }
 
   .category {
-    padding: 5px 7px;
+    padding: 4px 5px;
     border-width: 1px;
-    font-size: 9px;
+    font-size: 8.5px;
   }
 }
 
