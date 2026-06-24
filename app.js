@@ -38,13 +38,23 @@ function contributorForCard(category, number) {
   return `stuck-unstuck-pair-${pairedNumber}`;
 }
 
+const correctedStuckFronts = new Set([7, 9, 11, 13, 17, 19, 21]);
+
+function frontPathForCard(category, number) {
+  const label = labels[category];
+  const filename = category === "stuck" && correctedStuckFronts.has(number)
+    ? `${number} ${label} - FRONT CORRECTED.png`
+    : `${number} ${label} - FRONT.png`;
+  return `assets/fronts/${category}/${filename}`;
+}
+
 const allCards = Object.entries(cardNumbers).flatMap(([category, numbers]) =>
   numbers.map(number => ({
     number,
     category,
     tier: tierByNumber.get(number),
     contributor: contributorForCard(category, number),
-    front: `assets/fronts/${category}/${number} ${labels[category]} - FRONT.png`,
+    front: frontPathForCard(category, number),
     back: backs[category],
   }))
 );
