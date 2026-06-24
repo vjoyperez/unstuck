@@ -23,11 +23,27 @@ const tierByNumber = new Map(
   )
 );
 
+const wildcardContributorByNumber = {
+  1: "jeff-goodby",
+  2: "rich-silverstein",
+  15: "andy-pearson",
+  16: "andy-pearson",
+  31: "jesse-juriga",
+  32: "jesse-juriga",
+};
+
+function contributorForCard(category, number) {
+  if (category === "wildcard") return wildcardContributorByNumber[number];
+  const pairedNumber = number % 2 === 0 ? number - 1 : number;
+  return `stuck-unstuck-pair-${pairedNumber}`;
+}
+
 const allCards = Object.entries(cardNumbers).flatMap(([category, numbers]) =>
   numbers.map(number => ({
     number,
     category,
     tier: tierByNumber.get(number),
+    contributor: contributorForCard(category, number),
     front: `assets/fronts/${category}/${number} ${labels[category]} - FRONT.png`,
     back: backs[category],
   }))
@@ -48,6 +64,7 @@ let revealTimer = null;
 let anticipationTimer = null;
 let releaseTimer = null;
 let autoRevealPending = false;
+let lastDrawnContributor = null;
 
 function clearRevealSequence() {
   window.clearTimeout(revealTimer);
@@ -84,6 +101,27 @@ function resetDeckState(category) {
   };
 }
 
+function canFinishWithoutContributorRepeat(cards, precedingContributor) {
+  const counts = new Map();
+  cards.forEach(card => {
+    counts.set(card.contributor, (counts.get(card.contributor) || 0) + 1);
+  });
+
+  let previous = precedingContributor;
+  for (let index = 0; index < cards.length; index += 1) {
+    const next = [...counts.entries()]
+      .filter(([contributor, count]) => count > 0 && contributor !== previous)
+      .sort((left, right) => right[1] - left[1])[0];
+
+    if (!next) return false;
+    const [contributor, count] = next;
+    counts.set(contributor, count - 1);
+    previous = contributor;
+  }
+
+  return true;
+}
+
 function initializeDeckStates() {
   ["all", "stuck", "unstuck", "wildcard"].forEach(resetDeckState);
 }
@@ -117,14 +155,30 @@ function drawFromActiveDeck() {
     candidates = candidates.filter(card => card.category === requiredCategory);
   }
 
+  candidates = candidates.filter(card => card.contributor !== lastDrawnContributor);
+
+  const sequenceSafeCandidates = candidates.filter(candidate => {
+    const remainingAfterDraw = state.remaining.filter(card => card !== candidate);
+    return canFinishWithoutContributorRepeat(remainingAfterDraw, candidate.contributor);
+  });
+  if (sequenceSafeCandidates.length) candidates = sequenceSafeCandidates;
+
   // The supplied tier assignments guarantee an eligible card at every draw.
   // This guard keeps the deck usable if its contents are edited in the future.
-  if (!candidates.length) candidates = [...state.remaining];
+  if (!candidates.length) {
+    const nonRepeatingRemaining = state.remaining.filter(
+      card => card.contributor !== lastDrawnContributor
+    );
+    candidates = nonRepeatingRemaining.length
+      ? nonRepeatingRemaining
+      : [...state.remaining];
+  }
 
   const chosenCard = candidates[Math.floor(Math.random() * candidates.length)];
   const chosenIndex = state.remaining.indexOf(chosenCard);
   state.remaining.splice(chosenIndex, 1);
   state.drawCount += 1;
+  lastDrawnContributor = chosenCard.contributor;
 
   if (drawNumber === 1) state.firstCategory = chosenCard.category;
 
@@ -172,7 +226,7 @@ categories.forEach(button => {
   button.addEventListener("click", () => {
     selectedCategory = button.dataset.category;
     categories.forEach(item => item.classList.toggle("active", item === button));
-    drawCard();
+    drawCard(true);
   });
 });
 
