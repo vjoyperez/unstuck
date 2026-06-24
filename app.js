@@ -11,10 +11,23 @@ const backs = {
   wildcard: "assets/backs/WILDCARD - BACK.png",
 };
 
+const tierNumbers = {
+  A: [1, 2, 7, 8, 15, 16, 17, 18, 19, 20, 21, 22, 25, 26, 28, 31, 32, 45, 51, 52],
+  B: [3, 4, 5, 6, 9, 10, 13, 14, 23, 24, 27, 29, 30, 37, 38, 40, 41, 42, 44, 46, 47, 48, 49, 50, 53, 54],
+  C: [11, 12, 33, 34, 35, 36, 39, 43],
+};
+
+const tierByNumber = new Map(
+  Object.entries(tierNumbers).flatMap(([tier, numbers]) =>
+    numbers.map(number => [number, tier])
+  )
+);
+
 const allCards = Object.entries(cardNumbers).flatMap(([category, numbers]) =>
   numbers.map(number => ({
     number,
     category,
+    tier: tierByNumber.get(number),
     front: `assets/fronts/${category}/${number} ${labels[category]} - FRONT.png`,
     back: backs[category],
   }))
@@ -29,7 +42,7 @@ const emptyMessage = document.querySelector("#empty-message");
 const categories = [...document.querySelectorAll(".category")];
 
 let selectedCategory = "all";
-let deck = [];
+const deckStates = {};
 let currentCard = null;
 let revealTimer = null;
 let anticipationTimer = null;
@@ -57,39 +70,72 @@ function setRevealSequence(active) {
   flipButton.textContent = active ? "Revealing…" : "Flip";
 }
 
-function shuffled(cards) {
-  const copy = [...cards];
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
+function cardsForCategory(category) {
+  return category === "all"
+    ? allCards
+    : allCards.filter(card => card.category === category);
 }
 
-function cardsForSelection() {
-  return selectedCategory === "all"
-    ? allCards
-    : allCards.filter(card => card.category === selectedCategory);
+function resetDeckState(category) {
+  deckStates[category] = {
+    remaining: [...cardsForCategory(category)],
+    drawCount: 0,
+    firstCategory: null,
+  };
+}
+
+function initializeDeckStates() {
+  ["all", "stuck", "unstuck", "wildcard"].forEach(resetDeckState);
+}
+
+function tiersAvailableForDraw(drawNumber) {
+  if (drawNumber <= 2) return new Set(["A"]);
+  if (drawNumber <= 7) return new Set(["A", "B"]);
+  return new Set(["A", "B", "C"]);
+}
+
+function drawFromActiveDeck() {
+  if (!deckStates[selectedCategory].remaining.length) {
+    resetDeckState(selectedCategory);
+  }
+
+  const state = deckStates[selectedCategory];
+  const drawNumber = state.drawCount + 1;
+  const availableTiers = tiersAvailableForDraw(drawNumber);
+  let candidates = state.remaining.filter(card => availableTiers.has(card.tier));
+
+  if (
+    selectedCategory === "all" &&
+    drawNumber === 2 &&
+    ["stuck", "unstuck"].includes(state.firstCategory)
+  ) {
+    const requiredCategory = state.firstCategory === "stuck" ? "unstuck" : "stuck";
+    candidates = candidates.filter(card => card.category === requiredCategory);
+  }
+
+  // The supplied tier assignments guarantee an eligible card at every draw.
+  // This guard keeps the deck usable if its contents are edited in the future.
+  if (!candidates.length) candidates = [...state.remaining];
+
+  const chosenCard = candidates[Math.floor(Math.random() * candidates.length)];
+  const chosenIndex = state.remaining.indexOf(chosenCard);
+  state.remaining.splice(chosenIndex, 1);
+  state.drawCount += 1;
+
+  if (drawNumber === 1) state.firstCategory = chosenCard.category;
+
+  return chosenCard;
 }
 
 function updateControls() {
   flipButton.disabled = !currentCard;
-  emptyMessage.hidden = Boolean(currentCard) || deck.length > 0;
+  emptyMessage.hidden = Boolean(currentCard) || deckStates[selectedCategory].remaining.length > 0;
   cardEl.hidden = !currentCard;
-}
-
-function resetDeck() {
-  clearRevealSequence();
-  deck = shuffled(cardsForSelection());
-  currentCard = null;
-  cardEl.classList.remove("flipped", "dealing");
-  updateControls();
 }
 
 function drawCard(autoReveal = false) {
   clearRevealSequence();
-  if (!deck.length) deck = shuffled(cardsForSelection());
-  currentCard = deck.shift();
+  currentCard = drawFromActiveDeck();
   cardEl.classList.remove("flipped", "dealing");
   frontImage.src = currentCard.front;
   frontImage.alt = `${labels[currentCard.category]} card ${currentCard.number}`;
@@ -122,7 +168,6 @@ categories.forEach(button => {
   button.addEventListener("click", () => {
     selectedCategory = button.dataset.category;
     categories.forEach(item => item.classList.toggle("active", item === button));
-    resetDeck();
     drawCard();
   });
 });
@@ -130,7 +175,6 @@ categories.forEach(button => {
 flipButton.addEventListener("click", flipCard);
 cardEl.addEventListener("click", flipCard);
 shuffleButton.addEventListener("click", () => {
-  deck = shuffled(deck);
   drawCard(true);
 });
 
@@ -140,10 +184,9 @@ document.addEventListener("keydown", event => {
     flipCard();
   }
   if (event.code === "ArrowRight") {
-    deck = shuffled(deck);
     drawCard(true);
   }
 });
 
-resetDeck();
-drawCard();
+initializeDeckStates();
+drawCard(true);
